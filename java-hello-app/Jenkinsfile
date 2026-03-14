@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven_3.9'   // Jenkins global tool config name
+        jdk 'JDK17'         // Jenkins global JDK config name
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,28 +13,22 @@ pipeline {
             }
         }
 
-        stage('Compile') {
+        stage('Build') {
             steps {
-                sh 'javac -d out src/Main.java test/MainTest.java'
+                sh 'mvn clean compile'
             }
         }
 
         stage('Test') {
             steps {
-                // Run JUnit tests using the console launcher
-                sh 'java -jar junit-platform-console-standalone-1.10.0.jar --class-path out --scan-class-path'
+                sh 'mvn test'
             }
         }
 
-        stage('Run') {
+        stage('Package') {
             steps {
-                sh 'java -cp out Main'
-            }
-        }
-
-        stage('Archive') {
-            steps {
-                archiveArtifacts artifacts: 'out/**/*.class', fingerprint: true
+                sh 'mvn package'
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
     }
