@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/champcloud514/your-repo/java-hello-app.git'
+            }
+        }
+
+        stage('Compile') {
+            steps {
+                sh 'javac -d out src/Main.java test/MainTest.java'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run JUnit tests using the console launcher
+                sh 'java -jar junit-platform-console-standalone-1.10.0.jar --class-path out --scan-class-path'
+            }
+        }
+
+        stage('Run') {
+            steps {
+                sh 'java -cp out Main'
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'out/**/*.class', fingerprint: true
+            }
+        }
+    }
+}
